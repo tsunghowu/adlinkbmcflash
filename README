@@ -1,0 +1,60 @@
+-------------------------------------------------------------------------------
+bmcflash Linux version README
+-------------------------------------------------------------------------------
+
+Bmcflash is a utility for writing Adlink BMC(SEMA) flash chips. This work uses 
+the source code from the open source flashrom project.
+https://github.com/flashrom/flashrom
+
+This tool supports only one BMC chip, i.e. TI TivaC.
+
+
+Build Instructions
+------------------
+
+To build bmcflash you need to install the following software:
+
+ * i2c-i801 driver for Intel PCH Smbus controller.
+      sudo insmod i2c-i801.ko
+If your kernel does not have i2c-i801.ko driver, below is the steps to 
+make one. 
+    Step 1, Get kernel source, change the directory to 
+    {Kernel Source directory}/linux-{Kernel version}/drivers/i2c/busses and modify i2c-i801.c.
+
+    Step 2. Open vi and Search CONFIG_ACPI 
+
+    Step 3. Add #undef CONFIG_ACPI on top of line: #define CONFIG_ACPI . See below.
+        #undef CONFIG_ACPI
+        #ifdef CONFIG_ACPI
+
+    Step 4, Recompile the source by typing below command.
+                Make -C /lib/modules/$(uname -r)/build M=$(pwd) modules
+    Step 5, Install the module.
+       sudo insmod i2c-i801.ko 
+
+ * libi2c-dev
+      sudo apt-get install libi2c-dev
+
+To compile on Linux, use:
+ 
+ make
+
+Run it!
+------------
+ Check i2c-i801 driver is installed or not, if not, 
+ sudo insmod i2c-i801.ko    or if your kernel can enumerate PCH SMBUS ctrl 
+correctly, then use below command.
+ modprobe i2c-i801
+
+ sudo ./bmcflash -p i2c:dev=/dev/i2c-{x}:0x28 -w BmcApplicationFile.bin
+ 
+For example, if Intel PCH Smbus controller is enumerated as /dev/i2c-5, 
+and usually the slave address of Adlink SEMA BMC controller is 0x28. Then
+Issue command below to update BMC application part with below binary.
+(cSL2v9.bin) 
+
+ sudo ./bmcflash -p i2c:dev=/dev/i2c-5:28 -w cSL2v9.bin
+
+Contact
+-------
+ tsungho.wu@gmail.com
